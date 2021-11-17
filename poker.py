@@ -1,18 +1,19 @@
 import random
-
+import time
 
 ranks = '23456789TJQKA'
 hexVals  = '23456789abcde'
 
 class player:
     def __init__(self,pos):
-        self.holes = (52,52)
-        self.commCards = (52,52,52)
+        self.holes = [52,52]
+        self.commCards = [52,52,52]
         self.stack = 0
         self.bet = 0
         self.pos = pos
         self.active = False
         self.seated = False
+        self.name = 'Unknown ' + str(pos)
 
 class pot:
     def __init__(self,amt = 0, plyrs = []):
@@ -33,17 +34,21 @@ class game:
         self.bb = bb
         self.sb = sb
         self.deck = []
+        self.deckPos = 0
         for i in range(52):
             self.deck.append(i)
         self.pots = []
         self.topBet = 0
         self.board = [52,52,52,52,52]
         self.button = [0]
+        self.startStack = startStack
         
-    def addPlayer(self,pos,startStack,active=True):
+    def addPlayer(self,pos,startStack,active=True, name = ''):
         self.tb.players[pos].stack = startStack
         self.tb.players[pos].active = active
         self.tb.players[pos].seated = True
+        if name:
+            self.tb.players[pos].name = name
 
     def removePlayer(self,pos):
         self.tb.players[pos].stack = 0
@@ -71,7 +76,8 @@ class game:
         print ('Seat ' + str(self.button) + ' is the dealer')
         for plyr in self.tb.players:
             print ('Seat ' + str(plyr.pos))
-            print ('Hole Cards: ' + idCard(plyr.holes[0]) + ' ' + idCard(plyr.holes[1]))
+            print ('Name ' + plyr.name)
+            print ('Hole Cards: ' + self.idCard(plyr.holes[0]) + ' ' + self.idCard(plyr.holes[1]))
             print ('Seated: ' + str(plyr.seated) + ', Active: ' + str(plyr.active) + ', Stack: ' + str(plyr.stack) + ', Bet: ' + str(plyr.bet) + '\n')
             
     def getActive(self):
@@ -113,7 +119,7 @@ class game:
     def findSuit(self,card):
         if card < 13: 
             return 'c' 
-        elif card < 26:
+
             return 'd' 
         elif card < 39: 
             return 'h' 
@@ -125,6 +131,17 @@ class game:
             return 'XX'
         else:
             return ranks[card%13]+self.findSuit(card)
+
+    def deal(self):
+        self.shuffle()
+        self.deckPos = 0
+        for i in range(2):
+            for plyr in self.tb.players:
+                if plyr.active:
+                    plyr.holes[i] = self.deck[self.deckPos]
+                    self.deckPos +=1 
+                
+            
     
     def findTopHand(self,holes):
         topHand = []
@@ -177,7 +194,7 @@ class game:
                     
             # Find Straight TODO: Correct to use low ace
             straight = False
-            for i in range(len(cards)-4):{
+            for i in range(len(cards)-4):
                 print('i: ' +str(i))
                 chk = True
                 hand = [cards[i]]
@@ -218,15 +235,6 @@ class game:
                     print('pair of ' + ranks[pairs[pair][0]%13])
                 else:
                     print('possible kicker ' + ranks[pairs[pair][0]%13])
-                    
-                    
-                
-                    
-                
-                    
-                
-                        
-                    
 
 
 
@@ -266,7 +274,7 @@ def playHand(gm):
         print('B: Change Blinds')
         print('P: Play Hand')
         print('--------------------------------------')
-        s = input('Enter Selection')
+        s = input('Enter Selection: ')
         if s.upper() not in ['L','A','R','S','B','P']:
             print('Bad selection. Try again')
             continue
@@ -290,20 +298,10 @@ def playHand(gm):
                 else:
                     gm.removePlayer(int(pos))
             elif s.upper() == 'A':
-                
                 if len(gm.getActive()) < 3:
                     pass
-
-                
-        
-    
-             
-    
-    
-    
-
-
-
+            elif s.upper == 'P':
+                pass
 
         
     
